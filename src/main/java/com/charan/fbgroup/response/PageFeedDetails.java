@@ -1,5 +1,7 @@
 package com.charan.fbgroup.response;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 import java.util.List;
 
 public class PageFeedDetails {

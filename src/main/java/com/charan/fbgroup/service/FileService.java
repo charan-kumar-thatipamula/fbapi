@@ -3,6 +3,9 @@ package com.charan.fbgroup.service;
 import com.charan.fbgroup.response.FeedMessage;
 import com.charan.fbgroup.response.PageFeedDetails;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.springframework.social.facebook.api.Page;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -10,6 +13,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -41,10 +45,10 @@ public class FileService {
         return finalFile;
     }
 
-    private void writeToFile(PageFeedDetails pageFeedDetails, String fileName) {
+    public <T> void writeToFile(T t, String fileName) {
         ObjectMapper mapper = new ObjectMapper();
         try{
-            String jsonInString = mapper.writeValueAsString(pageFeedDetails);
+            String jsonInString = mapper.writeValueAsString(t);
             File file = new File(fileName);
             boolean isSuccess = file.createNewFile();
             FileWriter fw=new FileWriter(file, true);
@@ -67,10 +71,30 @@ public class FileService {
         pageFeedDetails.setData(feedMessages);
     }
 
-    private static<T> List<T> appendLists(List<T>... lists) {
+    public static<T> List<T> appendLists(List<T>... lists) {
         return Stream.of(lists)
                 .flatMap(x -> x.stream())
                 .collect(Collectors.toList());
     }
 
+    public List<PageFeedDetails> readFiles(String filePath) {
+        try {
+            String content = new String(Files.readAllBytes(Paths.get(filePath)));
+            JSONArray jsonArray = new JSONArray(content);
+            List<PageFeedDetails> pageFeedDetailsList = new ArrayList<>();
+            for (Object obj : jsonArray) {
+                PageFeedDetails pageFeedDetails = (PageFeedDetails) obj;
+                pageFeedDetailsList.add(pageFeedDetails);
+            }
+            return pageFeedDetailsList;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public File[] getFilesFromFolder(String folderPath) {
+        File folder = new File(folderPath);
+        return folder.listFiles();
+    }
 }
