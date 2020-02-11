@@ -1,6 +1,9 @@
 package com.charan.fbgroup.response;
 
+import com.charan.fbgroup.response.FeedMessage;
+import com.charan.fbgroup.response.PreviousNextLink;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.List;
 

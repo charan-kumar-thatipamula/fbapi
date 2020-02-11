@@ -5,7 +5,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.List;
 
-@Document(collection="posts")
+@Document(collection="posts_new")
 public class Post {
 
     @Id
@@ -18,6 +18,10 @@ public class Post {
     private String idForComment;
 
     private List<String> commentList;
+
+    private boolean commentsFetched;
+
+    private boolean savedInFileDeleteMe;
 
     public String getFbOriginalId() {
         return fbOriginalId;
@@ -57,5 +61,21 @@ public class Post {
 
     public void setCommentList(List<String> commentList) {
         this.commentList = commentList;
+    }
+
+    public boolean areCommentsFetched() {
+        return commentsFetched;
+    }
+
+    public void setCommentsFetched(boolean commentsFetched) {
+        this.commentsFetched = commentsFetched;
+    }
+
+    public boolean isSavedInFileDeleteMe() {
+        return savedInFileDeleteMe;
+    }
+
+    public void setSavedInFileDeleteMe(boolean savedInFileDeleteMe) {
+        this.savedInFileDeleteMe = savedInFileDeleteMe;
     }
 }

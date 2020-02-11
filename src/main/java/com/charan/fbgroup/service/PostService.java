@@ -2,13 +2,11 @@ package com.charan.fbgroup.service;
 
 import com.charan.fbgroup.conllection.Post;
 import com.charan.fbgroup.repository.PostRepository;
-import com.charan.fbgroup.response.Comment;
 import com.charan.fbgroup.response.FeedMessage;
 import com.charan.fbgroup.response.PageFeedDetails;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.LinkedList;
 import java.util.List;
 
 @Service
@@ -37,33 +35,51 @@ public class PostService {
         for (FeedMessage feedMessage : feedMessageList) {
             List<Post> posts = postRepository.findByFbOriginalId(feedMessage.getId());
             if (posts !=null && posts.size() != 0) {
+                System.out.println("post already present");
                 continue;
             }
             Post post = new Post();
             post.setPostMessage(feedMessage.getMessage());
             post.setFbOriginalId(feedMessage.getId());
             post.setIdForComment(commentService.getPostIdForComment(feedMessage));
+            post.setCommentsFetched(false);
             postRepository.save(post);
         }
     }
 
-    public void upsertComments(String idForComment, List<String> comments) {
+    public void upsertCommentsForPostsUsingOnlyCommentId(String idForComment, List<String> comments) {
         List<Post> posts = postRepository.findByIdForComment(idForComment);
+        updatePosts(posts, comments);
+    }
+
+    public void upsertCommentsForPostsUsingPostId(String commentId, List<String> comments) {
+        List<Post> posts = postRepository.findByFbOriginalId(commentId);
+        updatePosts(posts, comments);
+    }
+
+    private void updatePosts(List<Post> posts, List<String> comments) {
         if (posts == null || posts.size() == 0) {
             return;
         }
         Post post = posts.get(0);
-        if (post.getCommentList() == null) {
-            post.setCommentList(comments);
-        } else {
-            List<String> originalComments = post.getCommentList();
-            comments = fileService.appendLists(originalComments, comments);
+        if (comments != null) {
             post.setCommentList(comments);
         }
+        post.setCommentsFetched(true);
+//        if (post.getCommentList() == null) {
+//            post.setCommentList(comments);
+//        } else {
+//            List<String> originalComments = post.getCommentList();
+//            comments = fileService.appendLists(originalComments, comments);
+//            post.setCommentList(comments);
+//        }
         postRepository.save(post);
     }
-
     public List<Post> getPostsWithNoCommnets() {
         return postRepository.findByCommentList(null);
+    }
+
+    public List<Post> getPostsNoCommentsFetched() {
+        return postRepository.findByCommentsFetchedFalse();
     }
 }

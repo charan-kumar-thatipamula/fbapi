@@ -13,4 +13,10 @@ public interface PostRepository extends MongoRepository<Post, Integer> {
     List<Post> findByFbOriginalId(String fbOriginalId);
 
     List<Post> findByCommentList(List<String> commentList);
+
+    List<Post> findByCommentsFetchedFalse();
+
+    List<Post> findByCommentsFetchedTrue();
+
+    List<Post> findBySavedInFileDeleteMeFalse();
 }

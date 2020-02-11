@@ -1,7 +1,6 @@
 package com.charan.fbgroup.controller;
 
 import com.charan.fbgroup.conllection.Post;
-import com.charan.fbgroup.response.Comment;
 import com.charan.fbgroup.response.CommentResponse;
 import com.charan.fbgroup.response.PageFeedDetails;
 import com.charan.fbgroup.service.CommentService;
@@ -9,7 +8,6 @@ import com.charan.fbgroup.service.FileService;
 import com.charan.fbgroup.service.GroupService;
 import com.charan.fbgroup.service.PostService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Repository;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
@@ -30,6 +28,14 @@ public class GroupFeedController {
     @GetMapping(value="pagefeed/{group_id}")
     public PageFeedDetails pageFeedDetails(@PathVariable(value="group_id") String groupId) {
         return groupService.getFeed(groupId);
+    }
+
+    @GetMapping(value="pagefeed/{group_id}/limit/{limit}/accesstoken/{access_token}")
+    public PageFeedDetails pageFeedDetailsPathVariables(@PathVariable(value="group_id") String groupId,
+                                                        @PathVariable(value="limit") String limit,
+                                                        @PathVariable(value="access_token") String accessToken
+                                                        ) {
+        return groupService.getFeed(groupId, limit, accessToken);
     }
 
     @PostMapping(value = "comments")
@@ -67,7 +73,8 @@ public class GroupFeedController {
         for (Post post : postsWithNoComments) {
             i++;
             try {
-                String idForComment = post.getIdForComment();
+                String idForComment = post.getFbOriginalId();
+//                String idForComment = post.getIdForComment();
                 CommentResponse commentResponse = commentService.getCommentsForPost(idForComment);
                 commentService.processForCommentsInsertionInDB(idForComment, commentResponse);
                 System.out.println("idForComment: " + idForComment);
@@ -84,6 +91,43 @@ public class GroupFeedController {
                 } catch (InterruptedException ie) {
                     System.out.println("Interrupted exception occurred");
                 }
+            }
+        }
+    }
+
+
+    @PostMapping(value = "updatePostsWithComments")
+    public void updatePostsWithComments(@RequestBody Map<String, String> requestBody) throws Exception {
+        String accessToken = requestBody.get("accessToken");
+        List<Post> postsWithNoComments = postService.getPostsNoCommentsFetched();
+        System.out.println("Remaining posts: " + postsWithNoComments.size());
+        if (postsWithNoComments == null || postsWithNoComments.size() == 0) {
+            return;
+        }
+        long waitTime = 1200000;
+        int i=0;
+        for (Post post : postsWithNoComments) {
+            try {
+                String postId = post.getFbOriginalId();
+//                String idForComment = post.getIdForComment();
+                CommentResponse commentResponse = commentService.getCommentsForPost(postId, accessToken);
+                commentService.addCommentsUsingPostId(postId, commentResponse);
+                System.out.println("added comments for post: " + postId);
+                i++;
+            } catch (Exception e) {
+                System.out.println(e.getMessage());
+                System.out.println("Processed posts count: " + i);
+                break;
+//                i=0;
+//                try {
+//                    System.out.println("Going to sleep");
+//                    Thread.sleep(waitTime);
+//                    if (waitTime > 5) {
+//                        waitTime /= 2;
+//                    }
+//                } catch (InterruptedException ie) {
+//                    System.out.println("Interrupted exception occurred");
+//                }
             }
         }
     }

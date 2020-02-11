@@ -36,17 +36,25 @@ public class GroupService {
     RestApiManager restApiManager;
     @Autowired
     RequestRelated requestRelated;
+    @Autowired
+    PostService postService;
+
     public PageFeedDetails getFeed(String groupId) {
         String query = requestRelated.getQueryForFeed();
+        return getFeed(groupId, query);
+    }
+
+    public PageFeedDetails getFeed(String groupId, String query) {
         PageFeedDetails pageFeedDetails = null;
         try {
             pageFeedDetails = extractPageFeedRecursively(groupId, query);
         } catch (Exception e) {
             e.printStackTrace();
         }
-        String finalFileName = "finalData" + new Date().getTime() + ".txt";
-        writeToFile(pageFeedDetails, finalFileName);
-        System.out.println(finalFileName);
+//        String finalFileName = "/combinedData/02072020finalData" + new Date().getTime() + ".txt";
+//        writeToFile(pageFeedDetails, finalFileName);
+//        System.out.println(finalFileName);
+        postService.addPosts(pageFeedDetails);
         return pageFeedDetails;
     }
 
@@ -55,26 +63,33 @@ public class GroupService {
         PageFeedDetails pageFeedDetails = new PageFeedDetails();
         String fullUrl = null;
         while (true) {
-            PageFeedDetails tempPageFeedDetails = null;
-            if (fullUrl == null) {
-                tempPageFeedDetails = restApiManager.get(graphUrl, "/" + groupId + feedEndPoint, query, httpHeaders, PageFeedDetails.class);
-            } else {
-                tempPageFeedDetails = restApiManager.get(fullUrl, httpHeaders, PageFeedDetails.class);
-            }
+            try {
+                PageFeedDetails tempPageFeedDetails = null;
+                if (fullUrl == null) {
+                    tempPageFeedDetails = restApiManager.get(graphUrl, "/" + groupId + feedEndPoint, query, httpHeaders, PageFeedDetails.class);
+                } else {
+                    break;
+//                    tempPageFeedDetails = restApiManager.get(fullUrl, httpHeaders, PageFeedDetails.class);
+                }
 
-            if (tempPageFeedDetails != null && !tempPageFeedDetails.getData().isEmpty()) {
-                PreviousNextLink previousNextLink = tempPageFeedDetails.getPaging();
-                fullUrl = previousNextLink.getNext();
-                System.out.println("previous: " + fullUrl);
-                System.out.println("next: " + fullUrl);
-            }
+                if (tempPageFeedDetails != null && !tempPageFeedDetails.getData().isEmpty()) {
+                    PreviousNextLink previousNextLink = tempPageFeedDetails.getPaging();
+                    fullUrl = previousNextLink.getNext();
+                    System.out.println("previous: " + fullUrl);
+                    System.out.println("next: " + fullUrl);
+                }
 
-            if (tempPageFeedDetails == null || tempPageFeedDetails.getData().isEmpty() || fullUrl == null || fullUrl.length() == 0) {
+                if (tempPageFeedDetails == null || tempPageFeedDetails.getData().isEmpty() || fullUrl == null || fullUrl.length() == 0) {
+                    break;
+                }
+
+                writeToFile(tempPageFeedDetails, "02072020tempData_" + new Date().getTime() + ".txt");
+                appendData(pageFeedDetails, tempPageFeedDetails);
+            } catch (Exception e) {
+                System.out.println("exception fetching details: " + e.getMessage());
                 break;
             }
 
-            writeToFile(tempPageFeedDetails, "tempData_" + new Date().getTime() + ".txt");
-            appendData(pageFeedDetails, tempPageFeedDetails);
         }
         return pageFeedDetails;
     }
@@ -132,5 +147,10 @@ public class GroupService {
             e.printStackTrace();
         }
         return null;
+    }
+
+    public PageFeedDetails getFeed(String groupId, String limit, String accessToken) {
+        String query = requestRelated.getQueryForFeed(limit, accessToken);
+        return getFeed(groupId, query);
     }
 }

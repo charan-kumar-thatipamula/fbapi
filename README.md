@@ -1,1 +1,22 @@
 # fbapi
+
+Get accesstoken for api call
+https://developers.facebook.com/tools/explorer/249151295959120/
+
+Get feed details fb api:
+https://graph.facebook.com/v6.0/2014881298790727/feed?access_token=EAADimg59sFABADdr0AUFkCzkHJy12PIcpSdTZCf8MGT2MgN41YqHJruSqNAmJNZAFxaf3oHZBqULAUWJVJ1UOFQ3jVcPxZCDS4TZCSzuBHXDfdbARfZBTvchr6QzULVSxM7I3npJluIKEQh0zbjYaeaSzHkakUtjJU8Vx6nVa9ceBoC2t4C1vouBQfBUeSjy4ZD
+
+Get page feed API:
+localhost:8080/pagefeed/2014881298790727/limit/300/accesstoken/EAADimg59sFABANJCX1J4rROvrZAJ4OjRTnjXNr7ajhZAlNlVqBkY2egB7MAqbh7hrk7nt9gNqvBKFkeaAfAm1gd6QdFh6lU2U3I8KiGDJRjoEZCyTizj6HZAYxT6ZBzg0W8jFrK1638JKZCvMyfxxQn9AHjAap37lwL1zRRMtLJIQpfy3xEMHv7Us50tyvjtgZD
+
+Update posts with comments API:
+Method:
+URI: http://localhost:8080/updatePostsWithComments
+Verb: POST
+Body:
+{
+	"accessToken": "EAADimg59sFABANJCX1J4rROvrZAJ4OjRTnjXNr7ajhZAlNlVqBkY2egB7MAqbh7hrk7nt9gNqvBKFkeaAfAm1gd6QdFh6lU2U3I8KiGDJRjoEZCyTizj6HZAYxT6ZBzg0W8jFrK1638JKZCvMyfxxQn9AHjAap37lwL1zRRMtLJIQpfy3xEMHv7Us50tyvjtgZD"
+}
+
+Save posts to file:
+http://localhost:8080/savepoststofile
