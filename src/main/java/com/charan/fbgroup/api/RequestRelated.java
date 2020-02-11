@@ -17,13 +17,29 @@ public class RequestRelated {
 
     public String getQueryForFeed() {
         StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("?limit=100");
+        stringBuilder.append("?limit=500");
+        stringBuilder.append("&access_token=" + accessToken);
+        String query = stringBuilder.toString();
+        return query;
+    }
+
+    public String getQueryForFeed(String limit, String accessToken) {
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("?limit=" + limit);
         stringBuilder.append("&access_token=" + accessToken);
         String query = stringBuilder.toString();
         return query;
     }
 
     public String getQueryForComments() {
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("?summary=1&filter=stream");
+        stringBuilder.append("&access_token=" + accessToken);
+        String query = stringBuilder.toString();
+        return query;
+    }
+
+    public String getQueryForComments(String accessToken) {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("?summary=1&filter=stream");
         stringBuilder.append("&access_token=" + accessToken);

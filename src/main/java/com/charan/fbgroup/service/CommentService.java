@@ -17,7 +17,6 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 @Service
 public class CommentService {
@@ -50,7 +49,14 @@ public class CommentService {
     }
 
     public CommentResponse getCommentsForPost(String postIdForString) throws Exception {
-        java.lang.String query = requestRelated.getQueryForComments();
+        java.lang.String query = requestRelated.getQueryForComments(accessToken);
+        HttpHeaders httpHeaders = null;
+        CommentResponse commentResponse = restApiManager.get(graphUrl, "/" + postIdForString + commentsEndPoint, query, httpHeaders, CommentResponse.class);
+        return commentResponse;
+    }
+
+    public CommentResponse getCommentsForPost(String postIdForString, String accessToken) throws Exception {
+        java.lang.String query = requestRelated.getQueryForComments(accessToken);
         HttpHeaders httpHeaders = null;
         CommentResponse commentResponse = restApiManager.get(graphUrl, "/" + postIdForString + commentsEndPoint, query, httpHeaders, CommentResponse.class);
         return commentResponse;
@@ -90,7 +96,16 @@ public class CommentService {
         for (Comment comment : commentResponse.getData()) {
             comments.add(comment.getMessage());
         }
-        postService.upsertComments(idForComment, comments);
+        postService.upsertCommentsForPostsUsingOnlyCommentId(idForComment, comments);
+
+    }
+
+    public void addCommentsUsingPostId(String postId, CommentResponse commentResponse) {
+        List<String> comments = new LinkedList<>();
+        for (Comment comment : commentResponse.getData()) {
+            comments.add(comment.getMessage());
+        }
+        postService.upsertCommentsForPostsUsingPostId(postId, comments);
 
     }
 

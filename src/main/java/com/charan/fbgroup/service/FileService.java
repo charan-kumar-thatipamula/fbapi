@@ -1,35 +1,35 @@
 package com.charan.fbgroup.service;
 
+import com.charan.fbgroup.conllection.Post;
+import com.charan.fbgroup.conllection.PostsAndCommentsOnly;
 import com.charan.fbgroup.response.FeedMessage;
 import com.charan.fbgroup.response.PageFeedDetails;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.json.JSONArray;
-import org.json.JSONObject;
-import org.springframework.social.facebook.api.Page;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Service
 public class FileService {
 
-    public String appendFiles(String folderPath) throws IOException {
+    public String appendFiles(String folderPath, String filePrefix, String combinedFilePrefix) throws IOException {
         final File folder = new File(folderPath);
-        String finalFile = "finalFile_" + new Date().getTime() + ".txt";
+        String finalFile = combinedFilePrefix + new Date().getTime() + ".txt";
         PageFeedDetails pageFeedDetails = new PageFeedDetails();
         for (final File fileEntry : folder.listFiles()) {
             String filePath = fileEntry.getAbsolutePath();
             String fName = fileEntry.getName();
-            if (fName.indexOf("temp") != 0) {
+            if (fName.indexOf(filePrefix) != 0) {
                 continue;
             }
             System.out.println(filePath);
@@ -93,8 +93,68 @@ public class FileService {
         return null;
     }
 
+//    public String createExcelFromPosts(List<Post> posts, String excelPath) {
+//        XSSFWorkbook workbook = new XSSFWorkbook();
+//        XSSFSheet sheet = workbook.createSheet("Java Books");
+//
+//        Object[][] bookData = {
+//                {"Head First Java", "Kathy Serria", 79},
+//                {"Effective Java", "Joshua Bloch", 36},
+//                {"Clean Code", "Robert martin", 42},
+//                {"Thinking in Java", "Bruce Eckel", 35},
+//        };
+//
+//        int rowCount = 0;
+//
+//        for (Object[] aBook : bookData) {
+//            Row row = sheet.createRow(++rowCount);
+//
+//            int columnCount = 0;
+//
+//            for (Object field : aBook) {
+//                Cell cell = row.createCell(++columnCount);
+//                if (field instanceof String) {
+//                    cell.setCellValue((String) field);
+//                } else if (field instanceof Integer) {
+//                    cell.setCellValue((Integer) field);
+//                }
+//            }
+//
+//        }
+//
+//
+//        try (FileOutputStream outputStream = new FileOutputStream("JavaBooks.xlsx")) {
+//            workbook.write(outputStream);
+//        }
+//        return excelPath;
+//    }
+
     public File[] getFilesFromFolder(String folderPath) {
         File folder = new File(folderPath);
         return folder.listFiles();
+    }
+
+    public void createTxtFromPosts(List<Post> posts, String txtFilePath) throws IOException {
+        List<String> allPosts = posts
+                .stream()
+                .map(post -> {
+                    PostsAndCommentsOnly postsAndCommentsOnly = new PostsAndCommentsOnly();
+                    postsAndCommentsOnly.setPost(post.getPostMessage());
+                    postsAndCommentsOnly.setComments(post.getCommentList());
+                    ObjectMapper objectMapper = new ObjectMapper();
+                    try {
+                        return objectMapper.writeValueAsString(postsAndCommentsOnly);
+                    } catch (JsonProcessingException e) {
+                        return null;
+                    }
+                })
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+
+
+        Files.write(Paths.get(txtFilePath), Collections.singleton("[" + String.join(",", allPosts) + "]"));
+    }
+
+    public void createExcelFromPosts(List<Post> posts, String excelFilePath) {
     }
 }
