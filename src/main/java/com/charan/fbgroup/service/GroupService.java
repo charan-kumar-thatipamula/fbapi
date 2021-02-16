@@ -68,8 +68,8 @@ public class GroupService {
                 if (fullUrl == null) {
                     tempPageFeedDetails = restApiManager.get(graphUrl, "/" + groupId + feedEndPoint, query, httpHeaders, PageFeedDetails.class);
                 } else {
-                    break;
-//                    tempPageFeedDetails = restApiManager.get(fullUrl, httpHeaders, PageFeedDetails.class);
+//                    break;
+                    tempPageFeedDetails = restApiManager.get(fullUrl, httpHeaders, PageFeedDetails.class);
                 }
 
                 if (tempPageFeedDetails != null && !tempPageFeedDetails.getData().isEmpty()) {
